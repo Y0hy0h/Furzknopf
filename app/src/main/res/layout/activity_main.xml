@@ -15,10 +15,9 @@
         android:layout_gravity="center"
         android:src="@drawable/sel_fart_button"
         android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
         android:background="@android:color/transparent"
         android:clickable="true"
-        android:adjustViewBounds="true"
-        android:onClick="playFart"
-        android:nestedScrollingEnabled="false" />
+        android:onClick="playFart" />
 
 </FrameLayout>
