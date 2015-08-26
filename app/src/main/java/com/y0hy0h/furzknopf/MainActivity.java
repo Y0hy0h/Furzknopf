@@ -11,7 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageButton;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -31,6 +33,22 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Bind onTouchListener to fartbutton.
+        // This allows the button to fart when pressed down.
+        ImageButton fartbutton = (ImageButton) findViewById(R.id.fartbutton);
+        fartbutton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN: {
+                        playFart(view);
+                        return false;
+                    }
+                }
+                return false;
+            }
+        });
     }
 
     @Override
