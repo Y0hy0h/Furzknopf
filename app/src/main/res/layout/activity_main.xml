@@ -18,6 +18,7 @@
         android:adjustViewBounds="true"
         android:background="@android:color/transparent"
         android:clickable="true"
-        android:onClick="playFart" />
+        android:onClick="playFart"
+        android:contentDescription="@string/fartbuttonDescription"/>
 
 </FrameLayout>

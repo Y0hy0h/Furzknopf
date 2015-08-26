@@ -14,6 +14,9 @@ import android.view.MenuItem;
 import android.view.View;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Locale;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private static SoundPool mSoundPool;
+    private static LinkedList<Integer> mLoadedSoundIDs;
+    private static Random mRandom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,13 +37,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        // Initialize SoundPool depending on API version and load sounds.
+        // Initialize SoundPool depending on API version,
+        // initialize queue and Random and load sounds.
         int maxStreams = 6;
         if (Build.VERSION.SDK_INT >= 21)
             createSoundPoolWithBuilder(maxStreams);
         else
             createSoundPoolWithConstructor(maxStreams);
 
+        mLoadedSoundIDs = new LinkedList<>();
+        mRandom = new Random();
         loadSounds();
     }
 
@@ -46,8 +54,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        // Activity was stopped, release SoundPool's resources.
+        // Activity was stopped, release SoundPool's and queue's resources.
         mSoundPool.release();
+        mLoadedSoundIDs.clear();
+        mLoadedSoundIDs = null;
+        mRandom = null;
     }
 
     @Override
@@ -104,17 +115,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Loads the default fart sounds into the SoundPool.
+     * Loads the default fart sounds into the SoundPool and enqueues the sound's IDs.
      */
     private void loadSounds() {
-        //TODO: Load all sounds.
+
         AssetManager assetManager = getAssets();
 
         try {
-            // Load only one sound, for testing purposes.
-            Log.v(LOG_TAG, Integer.toString(mSoundPool.load(assetManager.openFd("fart01.wav"), 1)));
+            // Load all standard sounds and store IDs in queue.
+            for (int i = 1; i <= 15; i++) {
+                String pathToSound = String.format(Locale.US, "fart%02d.wav", i);
+                Log.v(LOG_TAG, "Loading "+pathToSound);
+                mLoadedSoundIDs.add(mSoundPool.load(assetManager.openFd(pathToSound), 1));
+            }
         } catch (IOException e) {
-            Log.e(LOG_TAG, "Default sound could not be loaded.", e);
+            Log.e(LOG_TAG, "Default sounds could not be loaded.", e);
         }
     }
 
@@ -123,7 +138,20 @@ public class MainActivity extends AppCompatActivity {
      * @param view The view that was clicked.
      */
     public void playFart(View view) {
-        //TODO: Randomize sounds and frequency/speed.
-        mSoundPool.play(1, 1, 1, 0, 0, 1);
+        // Skip up to 5 files randomly.
+        // Square the random number and map it between 1 and 5 for falloff in probability.
+        float randomNumber = mRandom.nextFloat();
+        randomNumber = randomNumber * randomNumber;
+        int skipAmount = (int) (randomNumber * 5);
+
+        // Skip to chosen soundID, move it to tail of list.
+        int nextSoundID = mLoadedSoundIDs.remove(skipAmount);
+        mLoadedSoundIDs.addLast(nextSoundID);
+
+        // Choose random frequency.
+        float freq = mRandom.nextFloat() * 0.75f + 0.75f;
+
+        // Play chosen sound with chosen frequency.
+        mSoundPool.play(nextSoundID, 1, 1, 0, 0, freq);
     }
 }
