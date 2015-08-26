@@ -2,4 +2,6 @@
     <string name="app_name">Fartbutton</string>
     <string name="action_settings">Settings</string>
     <string name="fartbuttonDescription">A red button showing an exclamation mark.</string>
+
+    <string name="noSoundLoaded">No sound loaded yet.</string>
 </resources>
