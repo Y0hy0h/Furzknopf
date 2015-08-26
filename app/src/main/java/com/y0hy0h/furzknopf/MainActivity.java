@@ -142,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             // Load all standard sounds and store IDs in queue.
             for (int i = 1; i <= 15; i++) {
-                String pathToSound = String.format(Locale.US, "fart%02d.wav", i);
+                String pathToSound = String.format(Locale.US, "fart%02d.ogg", i);
                 Log.v(LOG_TAG, "Loading "+pathToSound);
                 mLoadedSoundIDs.add(mSoundPool.load(assetManager.openFd(pathToSound), 1));
             }
