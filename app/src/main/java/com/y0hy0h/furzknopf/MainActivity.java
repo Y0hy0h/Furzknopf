@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -68,39 +69,6 @@ public class MainActivity extends AppCompatActivity {
         loadSounds();
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        // Activity was stopped, release SoundPool's and queue's resources.
-        mSoundPool.release();
-        mLoadedSoundIDs.clear();
-        mLoadedSoundIDs = null;
-        mRandom = null;
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
     /**
      * Creates SoundPool the new way (API >=21)
      * @param maxStreams The maximal amount of simultaneous sounds to play.
@@ -137,18 +105,56 @@ public class MainActivity extends AppCompatActivity {
      */
     private void loadSounds() {
 
-        AssetManager assetManager = getAssets();
+        final AssetManager assetManager = getAssets();
 
-        try {
-            // Load all standard sounds and store IDs in queue.
-            for (int i = 1; i <= 15; i++) {
-                String pathToSound = String.format(Locale.US, "fart%02d.ogg", i);
-                Log.v(LOG_TAG, "Loading "+pathToSound);
-                mLoadedSoundIDs.add(mSoundPool.load(assetManager.openFd(pathToSound), 1));
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Load all standard sounds and store IDs in queue.
+                    for (int i = 1; i <= 15; i++) {
+                        String pathToSound = String.format(Locale.US, "fart%02d.ogg", i);
+                        Log.v(LOG_TAG, "Loading "+pathToSound);
+                        mLoadedSoundIDs.add(mSoundPool.load(assetManager.openFd(pathToSound), 1));
+                    }
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Default sounds could not be loaded.", e);
+                }
             }
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Default sounds could not be loaded.", e);
+        }).start();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Activity was stopped, release SoundPool's and queue's resources.
+        mSoundPool.release();
+        mLoadedSoundIDs.clear();
+        mLoadedSoundIDs = null;
+        mRandom = null;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -156,15 +162,22 @@ public class MainActivity extends AppCompatActivity {
      * @param view The view that was clicked.
      */
     public void playFart(View view) {
-        // Skip up to 5 files randomly.
-        // Square the random number and map it between 1 and 5 for falloff in probability.
-        float randomNumber = mRandom.nextFloat();
-        randomNumber = randomNumber * randomNumber;
-        int skipAmount = (int) (randomNumber * 5);
 
-        // Skip to chosen soundID, move it to tail of list.
-        int nextSoundID = mLoadedSoundIDs.remove(skipAmount);
-        mLoadedSoundIDs.addLast(nextSoundID);
+        int nextSoundID = 0;
+
+        // Skip up to 5 files randomly.
+        if (mLoadedSoundIDs.size() >= 5) { // at least 5 sounds loaded
+            // Square the random number and map it between 1 and 5 for falloff in probability.
+            float randomNumber = mRandom.nextFloat();
+            randomNumber = randomNumber * randomNumber;
+            int skipAmount = (int) (randomNumber * 5);
+
+            // Skip to chosen soundID, move it to tail of list.
+            nextSoundID = mLoadedSoundIDs.remove(skipAmount);
+            mLoadedSoundIDs.addLast(nextSoundID);
+        } else if (mLoadedSoundIDs.size() == 0) { // no sound loaded yet
+            Toast.makeText(this, R.string.noSoundLoaded, Toast.LENGTH_SHORT).show();
+        }
 
         // Choose random frequency.
         float freq = mRandom.nextFloat() * 0.75f + 0.75f;
