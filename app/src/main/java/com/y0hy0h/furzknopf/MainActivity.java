@@ -1,12 +1,14 @@
 package com.y0hy0h.furzknopf;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -25,10 +27,13 @@ public class MainActivity extends AppCompatActivity {
 
     // tag for use in Log-statements
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+    private static Toast mToastNoSoundLoaded;
+
+    private Vibrator mVibrator;
 
     private static SoundPool mSoundPool;
     private static LinkedList<Integer> mLoadedSoundIDs;
-    private static int mBigFartID;
+    private static int mBigFartID = -1;
     private static Random mRandom = new Random();
 
     private static int mCoolDown;
@@ -37,6 +42,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Load vibrator.
+        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         // Bind onTouchListener to fartbutton.
         // This allows the button to fart when pressed down.
@@ -119,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
                     // Load all standard sounds and store IDs in queue.
                     for (int i = 1; i <= 15; i++) {
                         String pathToSound = String.format(Locale.US, "fart%02d.ogg", i);
-                        Log.v(LOG_TAG, "Loading "+pathToSound);
                         mLoadedSoundIDs.add(mSoundPool.load(assetManager.openFd(pathToSound), 1));
                     }
 
@@ -132,6 +139,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        // Stop vibration.
+        mVibrator.cancel();
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
 
@@ -139,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
         mSoundPool.release();
         mLoadedSoundIDs.clear();
         mLoadedSoundIDs = null;
-        mRandom = null;
+        mBigFartID = -1;
     }
 
     @Override
@@ -194,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
             nextSoundID = mLoadedSoundIDs.remove(skipAmount);
             mLoadedSoundIDs.addLast(nextSoundID);
         } else if (mLoadedSoundIDs.size() == 0) { // no sound loaded yet
-            Toast.makeText(this, R.string.noSoundLoaded, Toast.LENGTH_SHORT).show();
+            reportNoSoundLoaded();
         }
 
         // Choose random frequency.
@@ -205,16 +220,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Plays a big fart.
+     * Plays a big fart and vibrates.
      *
      * @see MainActivity#playNormalFart()
      */
     private void playBigFart() {
+        if (mBigFartID == -1) {
+            reportNoSoundLoaded();
+            return;
+        }
+
         // Choose random frequency.
         float freq = mRandom.nextFloat() * 0.3f + 0.9f;
 
         // Play chosen sound with chosen frequency.
         mSoundPool.play(mBigFartID, 1, 1, 0, 0, freq);
+
+        // Vibrate, add audio attributes depending on API level.
+        long[] duration = {(long) (55 * freq), (long) (3758 / freq)};
+        if (Build.VERSION.SDK_INT >= 21)
+            mVibrator.vibrate(
+                    duration,
+                    -1,
+                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()
+            );
+        else
+            mVibrator.vibrate(duration, -1);
+    }
+
+    private void reportNoSoundLoaded() {
+        if (mToastNoSoundLoaded != null) {
+            mToastNoSoundLoaded.cancel();
+        }
+
+        mToastNoSoundLoaded = Toast.makeText(this, R.string.noSoundLoaded, Toast.LENGTH_SHORT);
+        mToastNoSoundLoaded.show();
     }
 
     /**
