@@ -140,10 +140,12 @@ public class SoundControlFragment extends Fragment {
      */
     private void freeResources() {
         // Activity was stopped, release SoundPool's and queue's resources.
-        mSoundPool.release();
-        mLoadedSoundIDs.clear();
-        mLoadedSoundIDs = null;
-        mBigFartID = -1;
+        if (mLoadedSoundIDs != null) {
+            mSoundPool.release();
+            mLoadedSoundIDs.clear();
+            mLoadedSoundIDs = null;
+            mBigFartID = -1;
+        }
     }
 
     int getRegularSoundsLoaded() {
