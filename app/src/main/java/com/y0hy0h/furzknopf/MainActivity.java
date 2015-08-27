@@ -27,16 +27,25 @@ public class MainActivity extends AppCompatActivity {
 
     // tag for use in Log-statements
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+    ImageButton mFartbutton;
+
+    // toast object to prevent multiple toasts from stacking
     private static Toast mToastNoSoundLoaded;
 
     private Vibrator mVibrator;
 
     private static SoundPool mSoundPool;
+    // contains the IDs of the regular farts
     private static LinkedList<Integer> mLoadedSoundIDs;
     private static int mBigFartID = -1;
+
     private static Random mRandom = new Random();
 
+    // cooldown after which big fart is played
     private static int mCoolDown;
+    // flag, if bigFart is currently playing
+    private static boolean mBigFartPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,14 +57,20 @@ public class MainActivity extends AppCompatActivity {
 
         // Bind onTouchListener to fartbutton.
         // This allows the button to fart when pressed down.
-        ImageButton fartbutton = (ImageButton) findViewById(R.id.fartbutton);
-        fartbutton.setOnTouchListener(new View.OnTouchListener() {
+        mFartbutton = (ImageButton) findViewById(R.id.fartbutton);
+        mFartbutton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
                         playFart();
                         return false;
+                    }
+
+                    case MotionEvent.ACTION_UP : {
+                        // if big fart is playing, consume up action
+                        // to prevent button from popping back up
+                        return mBigFartPlaying;
                     }
                 }
                 return false;
@@ -241,16 +256,21 @@ public class MainActivity extends AppCompatActivity {
         if (mBigFartID == -1) {
             reportNoSoundLoaded();
             return;
+        } else if (mBigFartPlaying) {
+            return;
         }
 
         // Choose random frequency.
         float freq = mRandom.nextFloat() * 0.3f + 0.9f;
 
         // Play chosen sound with chosen frequency.
+        mBigFartPlaying = true;
         mSoundPool.play(mBigFartID, 1, 1, 0, 0, freq);
 
         // Vibrate, add audio attributes depending on API level.
-        long[] duration = {(long) (55 * freq), (long) (3758 / freq)};
+        // pause first, because recording does not begin immediately
+        final long[] duration = {(long) (55 * freq), (long) (3758 / freq)};
+
         if (Build.VERSION.SDK_INT >= 21)
             mVibrator.vibrate(
                     duration,
@@ -259,8 +279,25 @@ public class MainActivity extends AppCompatActivity {
             );
         else
             mVibrator.vibrate(duration, -1);
+
+        mFartbutton.postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        // in case the app has been stopped
+                        mSoundPool.stop(mBigFartID);
+
+                        mBigFartPlaying = false;
+                        mFartbutton.setPressed(false);
+                    }
+                }, duration[0] + duration[1]
+        );
     }
 
+    /**
+     * Shows a toast reporting that the sound is not yet loaded.
+     * Cancels toast, if already present, to prevent toast stacking.
+     */
     private void reportNoSoundLoaded() {
         if (mToastNoSoundLoaded != null) {
             mToastNoSoundLoaded.cancel();
@@ -275,7 +312,7 @@ public class MainActivity extends AppCompatActivity {
      * Cooldown is at least 75, maximum is 150 with increasing probability.
      */
     private void resetCoolDown() {
-        mCoolDown = 150 - getMappedRandomInt(75, 3);
+        mCoolDown = 0; //150 - getMappedRandomInt(75, 3);
     }
 
     /**
