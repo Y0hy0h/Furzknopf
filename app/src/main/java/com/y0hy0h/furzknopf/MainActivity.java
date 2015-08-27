@@ -28,7 +28,10 @@ public class MainActivity extends AppCompatActivity {
 
     private static SoundPool mSoundPool;
     private static LinkedList<Integer> mLoadedSoundIDs;
-    private static Random mRandom;
+    private static int mBigFartID;
+    private static Random mRandom = new Random();
+
+    private static int mCoolDown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,13 +46,16 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View view, MotionEvent event) {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
-                        playFart(view);
+                        playFart();
                         return false;
                     }
                 }
                 return false;
             }
         });
+
+        // Initialize cooldown. Survives onStop().
+        resetCoolDown();
     }
 
     @Override
@@ -65,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
             createSoundPoolWithConstructor(maxStreams);
 
         mLoadedSoundIDs = new LinkedList<>();
-        mRandom = new Random();
         loadSounds();
     }
 
@@ -117,6 +122,8 @@ public class MainActivity extends AppCompatActivity {
                         Log.v(LOG_TAG, "Loading "+pathToSound);
                         mLoadedSoundIDs.add(mSoundPool.load(assetManager.openFd(pathToSound), 1));
                     }
+
+                    mBigFartID = mSoundPool.load(assetManager.openFd("fart_big.ogg"), 1);
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Default sounds could not be loaded.", e);
                 }
@@ -158,19 +165,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * OnClick-action playing a fart.
-     * @param view The view that was clicked.
+     * OnTouch-action playing a fart.
      */
-    public void playFart(View view) {
+    public void playFart() {
+        if (mCoolDown > 0) {
+            mCoolDown--;
+            playNormalFart();
+        } else {
+            resetCoolDown();
+            playBigFart();
+        }
+    }
+
+    /**
+     * Plays a regular fart.
+     *
+     * @see MainActivity#playBigFart()
+     */
+    private void playNormalFart() {
 
         int nextSoundID = 0;
 
         // Skip up to 5 files randomly.
         if (mLoadedSoundIDs.size() >= 5) { // at least 5 sounds loaded
-            // Square the random number and map it between 1 and 5 for falloff in probability.
-            float randomNumber = mRandom.nextFloat();
-            randomNumber = randomNumber * randomNumber;
-            int skipAmount = (int) (randomNumber * 5);
+            int skipAmount = getMappedRandomInt(5, 2);
 
             // Skip to chosen soundID, move it to tail of list.
             nextSoundID = mLoadedSoundIDs.remove(skipAmount);
@@ -184,5 +202,41 @@ public class MainActivity extends AppCompatActivity {
 
         // Play chosen sound with chosen frequency.
         mSoundPool.play(nextSoundID, 1, 1, 0, 0, freq);
+    }
+
+    /**
+     * Plays a big fart.
+     *
+     * @see MainActivity#playNormalFart()
+     */
+    private void playBigFart() {
+        // Choose random frequency.
+        float freq = mRandom.nextFloat() * 0.3f + 0.9f;
+
+        // Play chosen sound with chosen frequency.
+        mSoundPool.play(mBigFartID, 1, 1, 0, 0, freq);
+    }
+
+    /**
+     * Resets the cooldown.
+     * Cooldown is at least 75, maximum is 150 with increasing probability.
+     */
+    private void resetCoolDown() {
+        mCoolDown = 150 - getMappedRandomInt(75, 3);
+    }
+
+    /**
+     * Returns a random int mapped between 1 and max
+     * with falloff in probability respecting the slope.
+     *
+     * @param max The maximal value of the result.
+     * @param slope The slope of the falloff in probability.
+     * @return An integer between 1 and max with falloff in probability respecting slope.
+     */
+    private int getMappedRandomInt(int max, int slope) {
+        // Square the random number and map it between 1 and max for falloff in probability.
+        float randomNumber = mRandom.nextFloat();
+        randomNumber = (float) Math.pow(randomNumber, slope);
+        return (int) (randomNumber * max);
     }
 }
