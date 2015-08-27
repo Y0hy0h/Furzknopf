@@ -1,6 +1,10 @@
 package com.y0hy0h.furzknopf;
 
+import android.content.Context;
+import android.media.AudioAttributes;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
@@ -10,19 +14,17 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
-import java.util.Random;
-
 public class MainActivity extends AppCompatActivity {
 
     // tag for use in Log-statements
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
+    private Vibrator mVibrator;
+
     private ImageButton mFartbutton;
 
     // toast object to prevent multiple toasts from stacking
     private static Toast mToastNoSoundLoaded;
-
-    private static Random mRandom = new Random();
 
     private static SoundControlFragment mSoundControl;
     private static final String FRAGMENT_TAG = "soundControlFragment";
@@ -37,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Bind SoundControlFragment.
         FragmentManager fm = getSupportFragmentManager();
         mSoundControl = (SoundControlFragment) fm.findFragmentByTag(FRAGMENT_TAG);
 
@@ -72,6 +75,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Load vibrator.
+        mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Stop vibration.
+        mVibrator.cancel();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -94,7 +113,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * OnTouch-action playing a fart.
+     * Plays a fart when touched.
+     * This is the method called through the fartbutton's onTouchListener.
      */
     private void playFart() {
         if (mCoolDown > 0) {
@@ -106,6 +126,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Plays big fart, vibrates and keeps button pressed.
+     * @see MainActivity#bigFart()
+     * @see SoundControlFragment#playRegularFart()
+     */
     private void regularFart() {
         if (mSoundControl.getRegularSoundsLoaded() > 0)
             mSoundControl.playRegularFart();
@@ -113,6 +138,11 @@ public class MainActivity extends AppCompatActivity {
             reportNoSoundLoaded();
     }
 
+    /**
+     * Plays big fart, vibrates and keeps button pressed.
+     * @see MainActivity#regularFart()
+     * @see SoundControlFragment#playBigFart()
+     */
     private void bigFart() {
         if (!mSoundControl.bigFartLoaded()) {
             reportNoSoundLoaded();
@@ -123,6 +153,15 @@ public class MainActivity extends AppCompatActivity {
 
         mBigFartPlaying = true;
         long duration = mSoundControl.playBigFart();
+
+        // Vibrate, add audio attributes depending on API level.
+        if (Build.VERSION.SDK_INT >= 21)
+            mVibrator.vibrate(
+                    duration,
+                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()
+            );
+        else
+            mVibrator.vibrate(duration);
 
         mFartbutton.postDelayed(
                 new Runnable() {
