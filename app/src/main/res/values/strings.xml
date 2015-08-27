@@ -7,4 +7,6 @@
 
     <!-- Error message when sound to be played has not been loaded yet. -->
     <string name="noSoundLoaded">No sound loaded yet.</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
