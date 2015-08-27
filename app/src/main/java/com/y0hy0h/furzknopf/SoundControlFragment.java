@@ -38,54 +38,39 @@ public class SoundControlFragment extends Fragment {
 
         // Load vibrator.
         mVibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
 
         // Initialize SoundPool depending on API version,
         // initialize queue and Random and load sounds.
-        int maxStreams = 6;
-        if (Build.VERSION.SDK_INT >= 21)
-            createSoundPoolWithBuilder(maxStreams);
-        else
-            createSoundPoolWithConstructor(maxStreams);
-
+        createSoundPoolCompatibly(6);
         mLoadedSoundIDs = new LinkedList<>();
         loadSounds();
     }
 
     /**
-     * Creates SoundPool the new way (API >=21)
-     * @param maxStreams The maximal amount of simultaneous sounds to play.
+     * Initializes the SoundPool with the preferred method depending on the API leve.
+     * @param maxStreams The number of sounds that can be played back simultaneously.
      */
     @TargetApi(21)
-    private void createSoundPoolWithBuilder(int maxStreams) {
-        // Set up attributes.
-        AudioAttributes audioAttributes = new AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build();
-
-        // Create SoundPool.
-        mSoundPool = new SoundPool.Builder()
-                .setAudioAttributes(audioAttributes)
-                .setMaxStreams(maxStreams)
-                .build();
-    }
-
-    /**
-     * Creates SoundPool the old way (API <21), ensuring compatibility.
-     * @param maxStreams The maximal amount of simultaneous sounds to play.
-     */
     @SuppressWarnings("deprecation")
-    private void createSoundPoolWithConstructor(int maxStreams) {
-        // Create SoundPool and set VolumeControl.
-        mSoundPool = new SoundPool(maxStreams, AudioManager.STREAM_MUSIC, 0);
+    private void createSoundPoolCompatibly(int maxStreams) {
+        if (Build.VERSION.SDK_INT >= 21) {
+            // Set up attributes.
+            AudioAttributes audioAttributes = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
 
-        getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
+            // Create SoundPool.
+            mSoundPool = new SoundPool.Builder()
+                    .setAudioAttributes(audioAttributes)
+                    .setMaxStreams(maxStreams)
+                    .build();
+        } else {
+            // Create SoundPool and set VolumeControl.
+            mSoundPool = new SoundPool(maxStreams, AudioManager.STREAM_MUSIC, 0);
+
+            getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
+        }
     }
 
     /**
