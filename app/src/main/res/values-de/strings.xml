@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Furzknopf</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="fartbuttonDescription">Ein roter Knopf mit einem Ausrufezeichen.</string>
+    <string name="noSoundLoaded">Noch kein Sound geladen.</string>
+</resources>

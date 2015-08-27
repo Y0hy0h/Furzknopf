@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">Fartbutton</string>
     <string name="action_settings">Settings</string>
+
+    <!-- Used for the content description of the fartbutton. -->
     <string name="fartbuttonDescription">A red button showing an exclamation mark.</string>
 
+    <!-- Error message when sound to be played has not been loaded yet. -->
     <string name="noSoundLoaded">No sound loaded yet.</string>
 </resources>
