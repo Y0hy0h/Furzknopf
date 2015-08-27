@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
     // tag for use in Log-statements
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
-    ImageButton mFartbutton;
+    private ImageButton mFartbutton;
 
     // toast object to prevent multiple toasts from stacking
     private static Toast mToastNoSoundLoaded;
@@ -96,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * OnTouch-action playing a fart.
      */
-    public void playFart() {
+    private void playFart() {
         if (mCoolDown > 0) {
             mCoolDown--;
             regularFart();
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
      * Shows a toast reporting that the sound is not yet loaded.
      * Cancels toast, if already present, to prevent toast stacking.
      */
-    protected void reportNoSoundLoaded() {
+    private void reportNoSoundLoaded() {
         if (mToastNoSoundLoaded != null) {
             mToastNoSoundLoaded.cancel();
         }

@@ -31,23 +31,37 @@ public class SoundControlFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.v(LOG_TAG, "Recreating SoundControl");
-
         // Retain fragment when runtime change occurs in Activity.
         setRetainInstance(true);
 
         // Load vibrator.
         mVibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
+        initAndLoadSounds();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // If necessary initialize SoundPool and load sounds.
+        if (mLoadedSoundIDs == null) {
+            initAndLoadSounds();
+        }
+    }
+
+    /**
+     * Initializes the SoundPool and ID-queue and loads default sounds.
+     */
+    private void initAndLoadSounds() {
         // Initialize SoundPool depending on API version,
-        // initialize queue and Random and load sounds.
         createSoundPoolCompatibly(6);
         mLoadedSoundIDs = new LinkedList<>();
         loadSounds();
     }
 
     /**
-     * Initializes the SoundPool with the preferred method depending on the API leve.
+     * Initializes the SoundPool with the preferred method depending on the API level.
      * @param maxStreams The number of sounds that can be played back simultaneously.
      */
     @TargetApi(21)
@@ -112,11 +126,26 @@ public class SoundControlFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+
+        // Free resources when not restarting, if API level is appropriate.
+        if (Build.VERSION.SDK_INT >= 11 && !getActivity().isChangingConfigurations()) {
+            freeResources();
+        }
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
 
-        Log.v(LOG_TAG, "Destroying SoundControl");
+        freeResources();
+    }
 
+    /**
+     * Frees most of the resources that are kept by the app.
+     */
+    private void freeResources() {
         // Stop vibration.
         mVibrator.cancel();
 
@@ -127,7 +156,7 @@ public class SoundControlFragment extends Fragment {
         mBigFartID = -1;
     }
 
-    protected int getRegularSoundsLoaded() {
+    int getRegularSoundsLoaded() {
         return mLoadedSoundIDs.size();
     }
 
@@ -163,7 +192,7 @@ public class SoundControlFragment extends Fragment {
      * @return amount of milliseconds that the big fart will last
      * @see SoundControlFragment#playRegularFart()
      */
-    protected long playBigFart() {
+    long playBigFart() {
         // Choose random frequency.
         float freq = Utility.getFloatBetween(0.9f, 1.2f);
 
@@ -187,7 +216,11 @@ public class SoundControlFragment extends Fragment {
         return duration[0] + duration[1];
     }
 
-    protected boolean bigFartLoaded() {
+    /**
+     * Returns whether the big fart is already loaded.
+     * @return whether bigFart is already loaded.
+     */
+    boolean bigFartLoaded() {
         return mBigFartID != -1;
     }
 }
