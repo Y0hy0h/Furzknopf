@@ -121,16 +121,29 @@ public class MainActivity extends AppCompatActivity {
         final AssetManager assetManager = getAssets();
 
         new Thread(new Runnable() {
+            private int tempBigFartID;
+
             @Override
             public void run() {
+                mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+                    @Override
+                    public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                        if (sampleId == tempBigFartID) {
+                            mBigFartID = sampleId;
+                        } else {
+                            mLoadedSoundIDs.add(sampleId);
+                        }
+                    }
+                });
+
                 try {
                     // Load all standard sounds and store IDs in queue.
                     for (int i = 1; i <= 15; i++) {
                         String pathToSound = String.format(Locale.US, "fart%02d.ogg", i);
-                        mLoadedSoundIDs.add(mSoundPool.load(assetManager.openFd(pathToSound), 1));
+                        mSoundPool.load(assetManager.openFd(pathToSound), 1);
                     }
 
-                    mBigFartID = mSoundPool.load(assetManager.openFd("fart_big.ogg"), 1);
+                    tempBigFartID = mSoundPool.load(assetManager.openFd("fart_big.ogg"), 1);
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Default sounds could not be loaded.", e);
                 }
