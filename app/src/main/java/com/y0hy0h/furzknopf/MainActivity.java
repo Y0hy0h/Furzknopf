@@ -29,6 +29,9 @@ public class MainActivity extends AppCompatActivity {
 
     // cooldown after which big fart is played
     private static int mCoolDown;
+    // String for onSaveInstance's Bundle key
+    private static final String STATE_COOLDOWN = "cooldown";
+
     // flag, if bigFart is currently playing
     private static boolean mBigFartPlaying = false;
 
@@ -69,7 +72,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Initialize cooldown. Survives onStop().
-        resetCoolDown();
+        if (savedInstanceState != null) {
+            mCoolDown = savedInstanceState.getInt(STATE_COOLDOWN);
+        } else {
+            resetCoolDown();
+        }
     }
 
     @Override
@@ -88,11 +95,24 @@ public class MainActivity extends AppCompatActivity {
         mVibrator.cancel();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(STATE_COOLDOWN, mCoolDown);
+
+        super.onSaveInstanceState(outState);
+    }
+
     /**
      * Plays a fart when touched.
      * This is the method called through the fartbutton's onTouchListener.
      */
     private void playFart() {
+        // Abort if big fart is currently playing.
+        if (mBigFartPlaying) {
+            return;
+        }
+
+        // Play regular or big fart depending on cooldown.
         if (mCoolDown > 0) {
             mCoolDown--;
             regularFart();
@@ -122,8 +142,6 @@ public class MainActivity extends AppCompatActivity {
     private void bigFart() {
         if (!mSoundControl.bigFartLoaded()) {
             reportNoSoundLoaded();
-            return;
-        } else if (mBigFartPlaying) {
             return;
         }
 
@@ -169,6 +187,6 @@ public class MainActivity extends AppCompatActivity {
      * Cooldown is at least 75, maximum is 150 with increasing probability.
      */
     private void resetCoolDown() {
-        mCoolDown = 150 - Utility.getMappedRandomInt(75, 3);
+        mCoolDown = 150 - Utility.getMappedRandomInt(75, 2);
     }
 }
