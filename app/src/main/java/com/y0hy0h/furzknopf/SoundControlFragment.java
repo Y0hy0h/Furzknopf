@@ -34,6 +34,14 @@ public class SoundControlFragment extends Fragment {
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // Set appropriate volume control.
+        getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
 
@@ -73,10 +81,8 @@ public class SoundControlFragment extends Fragment {
                     .setMaxStreams(maxStreams)
                     .build();
         } else {
-            // Create SoundPool and set VolumeControl.
+            // Create SoundPool.
             mSoundPool = new SoundPool(maxStreams, AudioManager.STREAM_MUSIC, 0);
-
-            getActivity().setVolumeControlStream(AudioManager.STREAM_MUSIC);
         }
     }
 
