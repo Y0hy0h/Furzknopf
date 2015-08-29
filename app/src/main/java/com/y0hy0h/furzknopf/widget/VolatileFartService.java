@@ -1,4 +1,4 @@
-package com.y0hy0h.furzknopf;
+package com.y0hy0h.furzknopf.widget;
 
 import android.app.Service;
 import android.content.Context;
@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.y0hy0h.furzknopf.Utility;
 
 import java.util.Locale;
 

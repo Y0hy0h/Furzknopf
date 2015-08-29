@@ -1,4 +1,4 @@
-package com.y0hy0h.furzknopf;
+package com.y0hy0h.furzknopf.widget;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -6,6 +6,8 @@ import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
+
+import com.y0hy0h.furzknopf.R;
 
 public class FartbuttonWidget extends AppWidgetProvider {
 
@@ -24,4 +26,3 @@ public class FartbuttonWidget extends AppWidgetProvider {
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
     }
 }
-
