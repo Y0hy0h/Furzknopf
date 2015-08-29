@@ -3,14 +3,15 @@ package com.y0hy0h.furzknopf.widget;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.y0hy0h.furzknopf.Utility;
 
+import java.io.IOException;
 import java.util.Locale;
 
 public class VolatileFartService extends Service {
@@ -31,19 +32,29 @@ public class VolatileFartService extends Service {
                         "fart%02d.ogg",
                         Utility.getIntBetween(1, 15)
                 );
-               MediaPlayer tempMediaPlayer = MediaPlayer.create(
-                        this,
-                        Uri.parse("file:///android_asset/"+pathToFile)
-                );
-                tempMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        mp.release();
-                        stopSelf();
-                    }
-                });
-                Log.v(LOG_TAG, "Start playing");
-                tempMediaPlayer.start();
+
+                try {
+                    AssetFileDescriptor assetFD = getAssets().openFd(pathToFile);
+                    MediaPlayer tempMediaPlayer = new MediaPlayer();
+                    tempMediaPlayer.setDataSource(
+                            assetFD.getFileDescriptor(),
+                            assetFD.getStartOffset(),
+                            assetFD.getLength()
+                    );
+                    assetFD.close();
+                    tempMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                        @Override
+                        public void onCompletion(MediaPlayer mp) {
+                            mp.release();
+                            stopSelf();
+                        }
+                    });
+                    tempMediaPlayer.prepare();
+                    Log.v(LOG_TAG, "Start playing");
+                    tempMediaPlayer.start();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "File "+pathToFile+" could not be loaded.", e);
+                }
             }
         }
 
