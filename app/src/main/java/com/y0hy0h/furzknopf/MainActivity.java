@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Load vibrator.
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-        if (!mVibrator.hasVibrator()) {
+        if (Build.VERSION.SDK_INT >= 11 && !mVibrator.hasVibrator()) {
             reportNoVibratorFound();
         }
     }
