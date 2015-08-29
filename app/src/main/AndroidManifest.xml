@@ -28,6 +28,11 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/fartbutton_widget_info" />
         </receiver>
+
+        <service
+            android:name=".VolatileFartService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

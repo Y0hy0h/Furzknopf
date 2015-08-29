@@ -26,4 +26,11 @@ public class Utility {
     public static float getFloatBetween(float min, float max) {
         return mRandom.nextFloat() * (max - min) + min;
     }
+
+    /**
+     * Returns random int between min and max.
+     */
+    public static int getIntBetween(int min, int max) {
+        return mRandom.nextInt(max - min) + min;
+    }
 }

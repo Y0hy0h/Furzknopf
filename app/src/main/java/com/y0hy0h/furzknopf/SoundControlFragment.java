@@ -56,7 +56,7 @@ public class SoundControlFragment extends Fragment {
      */
     private void initAndLoadSounds() {
         // Initialize SoundPool depending on API version,
-        createSoundPoolCompatibly(6);
+        mSoundPool = createSoundPoolCompatibly(6);
         mLoadedSoundIDs = new LinkedList<>();
         loadSounds();
     }
@@ -67,7 +67,9 @@ public class SoundControlFragment extends Fragment {
      */
     @TargetApi(21)
     @SuppressWarnings("deprecation")
-    private void createSoundPoolCompatibly(int maxStreams) {
+    static SoundPool createSoundPoolCompatibly(int maxStreams) {
+        SoundPool resSoundPool;
+
         if (Build.VERSION.SDK_INT >= 21) {
             // Set up attributes.
             AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -76,14 +78,16 @@ public class SoundControlFragment extends Fragment {
                     .build();
 
             // Create SoundPool.
-            mSoundPool = new SoundPool.Builder()
+            resSoundPool = new SoundPool.Builder()
                     .setAudioAttributes(audioAttributes)
                     .setMaxStreams(maxStreams)
                     .build();
         } else {
             // Create SoundPool.
-            mSoundPool = new SoundPool(maxStreams, AudioManager.STREAM_MUSIC, 0);
+            resSoundPool = new SoundPool(maxStreams, AudioManager.STREAM_MUSIC, 0);
         }
+
+        return resSoundPool;
     }
 
     /**
