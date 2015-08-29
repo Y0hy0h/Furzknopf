@@ -91,8 +91,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        // Stop vibration.
-        mVibrator.cancel();
+        // Stop vibration, if just recreating app.
+        if (Build.VERSION.SDK_INT >= 11 && !isChangingConfigurations()) {
+            mVibrator.cancel();
+        }
     }
 
     @Override
