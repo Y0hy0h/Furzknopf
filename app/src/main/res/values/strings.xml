@@ -7,4 +7,6 @@
 
     <!-- Error message when sound to be played has not been loaded yet. -->
     <string name="noSoundLoaded">No sound loaded yet.</string>
+    <!-- Error message when no vibrator has been found. -->
+    <string name="noVibratorFound">Vibrations are disabled on this device.</string>
 </resources>

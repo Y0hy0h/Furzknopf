@@ -21,8 +21,9 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageButton mFartbutton;
 
-    // toast object to prevent multiple toasts from stacking
+    // toast objects to prevent multiple toasts from stacking
     private static Toast mToastNoSoundLoaded;
+    private static Toast mToastNoVibrator;
 
     private static SoundControlFragment mSoundControl;
     private static final String FRAGMENT_TAG = "soundControlFragment";
@@ -85,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
 
         // Load vibrator.
         mVibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if (!mVibrator.hasVibrator()) {
+            reportNoVibratorFound();
+        }
     }
 
     @Override
@@ -182,6 +186,19 @@ public class MainActivity extends AppCompatActivity {
 
         mToastNoSoundLoaded = Toast.makeText(this, R.string.noSoundLoaded, Toast.LENGTH_SHORT);
         mToastNoSoundLoaded.show();
+    }
+
+    /**
+     * Shows a toast reporting that vibrator has been found.
+     * Cancels toast, if already present, to prevent toast stacking.
+     */
+    private void reportNoVibratorFound() {
+        if (mToastNoVibrator != null) {
+            mToastNoVibrator.cancel();
+        }
+
+        mToastNoVibrator = Toast.makeText(this, R.string.noVibratorFound, Toast.LENGTH_SHORT);
+        mToastNoVibrator.show();
     }
 
     /**
