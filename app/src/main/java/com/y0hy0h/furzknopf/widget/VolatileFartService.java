@@ -18,7 +18,7 @@ public class VolatileFartService extends Service {
 
     private static final String LOG_TAG = VolatileFartService.class.getSimpleName();
 
-    private static final String ACTION_PLAY_FART = "com.y0hy0h.furzknopf.action.FOO";
+    private static final String ACTION_PLAY_FART = "com.y0hy0h.furzknopf.action.playFart";
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
