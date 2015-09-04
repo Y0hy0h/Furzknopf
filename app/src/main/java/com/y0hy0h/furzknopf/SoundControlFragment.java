@@ -166,16 +166,16 @@ public class SoundControlFragment extends Fragment {
      */
     public void playRegularFart() {
 
-        int nextSoundID = 0;
+        int skipAmount = 0;
 
-        // Skip up to 5 files randomly.
+        // Skip up to 5 files randomly, if possible.
         if (mLoadedSoundIDs.size() >= 5) { // at least 5 sounds loaded
-            int skipAmount = Utility.getMappedRandomInt(5, 2);
-
-            // Skip to chosen soundID, move it to tail of list.
-            nextSoundID = mLoadedSoundIDs.remove(skipAmount);
-            mLoadedSoundIDs.addLast(nextSoundID);
+            skipAmount = Utility.getMappedRandomInt(5, 2);
         }
+
+        // Skip to chosen soundID, move it to tail of list.
+        int nextSoundID = mLoadedSoundIDs.remove(skipAmount);
+        mLoadedSoundIDs.addLast(nextSoundID);
 
         // Choose random frequency.
         float freq = Utility.getFloatBetween(0.75f, 1.5f);
