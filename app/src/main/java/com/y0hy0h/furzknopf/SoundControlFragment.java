@@ -116,11 +116,11 @@ public class SoundControlFragment extends Fragment {
                 try {
                     // Load all standard sounds and store IDs in queue.
                     for (int i = 1; i <= 15; i++) {
-                        String pathToSound = String.format(Locale.US, "fart%02d.ogg", i);
+                        String pathToSound = String.format(Locale.US, "fart%02d.wav", i);
                         mSoundPool.load(assetManager.openFd(pathToSound), 1);
                     }
 
-                    tempBigFartID = mSoundPool.load(assetManager.openFd("fart_big.ogg"), 1);
+                    tempBigFartID = mSoundPool.load(assetManager.openFd("fart_big.wav"), 1);
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Default sounds could not be loaded.", e);
                 }
