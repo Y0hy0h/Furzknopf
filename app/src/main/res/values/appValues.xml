@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--_____________ INTERNAL RESOURECES, DO NOT TRANSLATE _____________-->
+    <string name="fartPref_key">fartPreferences</string>
+    <string name="fartPref_cooldown">fartPreferences_cooldown</string>
+    <string name="fartPref_playedList">fartPreferences_playedList</string>
+</resources>

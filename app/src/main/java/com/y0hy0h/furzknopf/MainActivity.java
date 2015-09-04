@@ -203,6 +203,10 @@ public class MainActivity extends AppCompatActivity {
      * Cooldown is at least 75, maximum is 150 with increasing probability.
      */
     private void resetCoolDown() {
-        mCoolDown = 150 - Utility.getMappedRandomInt(75, 2);
+        mCoolDown = getNewCoolDown();
+    }
+
+    public static int getNewCoolDown() {
+        return 150 - Utility.getMappedRandomInt(75, 2);
     }
 }
