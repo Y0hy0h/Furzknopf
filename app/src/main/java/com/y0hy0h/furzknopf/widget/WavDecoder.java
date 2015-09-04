@@ -42,7 +42,7 @@ public class WavDecoder {
         int channels = buffer.getShort();
         checkFormat(channels == 1, "Unsupported channels: " + channels);
         int rate = buffer.getInt();
-        checkFormat(rate <= 48000 && rate >= 11025, "Unsupported rate: " + rate);
+        checkFormat(rate == 44100, "Unsupported rate: " + rate);
 
         buffer.position(34);
         int bits = buffer.getShort();
