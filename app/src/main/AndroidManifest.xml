@@ -30,7 +30,7 @@
         </receiver>
 
         <service
-            android:name=".widget.VolatileFartService"
+            android:name=".widget.PermanentFartService"
             android:exported="false" >
         </service>
     </application>

@@ -13,6 +13,7 @@ import android.util.Log;
 
 import com.y0hy0h.furzknopf.MainActivity;
 import com.y0hy0h.furzknopf.R;
+import com.y0hy0h.furzknopf.SoundController;
 import com.y0hy0h.furzknopf.Utility;
 
 import java.io.IOException;
@@ -20,11 +21,15 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.Locale;
 
-public class VolatileFartService extends Service {
+public class PermanentFartService extends Service {
 
-    private static final String LOG_TAG = VolatileFartService.class.getSimpleName();
+    private static final String LOG_TAG = PermanentFartService.class.getSimpleName();
 
-    private static final String ACTION_PLAY_FART = "com.y0hy0h.furzknopf.action.playFart";
+    private static final String ACTION_BASE = "com.y0hy0h.furzknopf.action";
+    private static final String ACTION_PLAY_FART = ACTION_BASE + ".playFart";
+    private static final String ACTION_POKE = ACTION_BASE + ".poke";
+
+    private SoundController mSoundControl;
 
     /**
      * Plays a fart, if right Intent is passed.
@@ -37,33 +42,24 @@ public class VolatileFartService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         if (intent != null) {
-            final String action = intent.getAction();
-            if (ACTION_PLAY_FART.equals(action)) {
-                Log.v(LOG_TAG, "Intent received");
-
-                // Get the file to be played.
-                String pathToFile = loadNextSoundFile();
-
-                // Load file and play.
-                InputStream audioIS = null;
-
-                try {
-                    audioIS = getAssets().openFd(pathToFile).createInputStream();
-                    playSound(audioIS);
-
-                } catch (IOException e) {
-                    Log.e(LOG_TAG, "File "+pathToFile+" could not be loaded.", e);
-                } finally {
-                    // Close InputStream.
-                    if (audioIS != null) {
-                        try {
-                            audioIS.close();
-                        } catch (IOException e) {
-                            Log.e(LOG_TAG, "Error closing InputStream", e);
-                        }
+            switch (intent.getAction()) {
+                case ACTION_PLAY_FART: {
+                    if (mSoundControl != null) {
+                        mSoundControl.playRegularFart();
+                    } else {
+                        mSoundControl = new SoundController();
+                        mSoundControl.initAndLoadSounds(getAssets());
                     }
+                    break;
+                }
+
+                case ACTION_POKE: {
+                    mSoundControl = new SoundController();
+                    mSoundControl.initAndLoadSounds(getAssets());
+                    break;
                 }
             }
+
         }
 
         return START_NOT_STICKY;
@@ -166,7 +162,7 @@ public class VolatileFartService extends Service {
         });
 
         // Randomize frequency.
-        at.setPlaybackRate( (int) (info.mRate * Utility.getFloatBetween(0.75f, 1.5f)) );
+        at.setPlaybackRate((int) (info.mRate * Utility.getFloatBetween(0.75f, 1.5f)));
         Log.v(LOG_TAG, "Starting playback");
         // Start playback.
         at.play();
@@ -178,8 +174,15 @@ public class VolatileFartService extends Service {
      * @return An Intent to play a fart.
      */
     public static Intent createIntentPlayFart(Context context) {
-        Intent intent = new Intent(context, VolatileFartService.class);
+        Intent intent = new Intent(context, PermanentFartService.class);
         intent.setAction(ACTION_PLAY_FART);
+
+        return intent;
+    }
+
+    public static Intent createIntentPoke(Context context) {
+        Intent intent = new Intent(context, PermanentFartService.class);
+        intent.setAction(ACTION_POKE);
 
         return intent;
     }
