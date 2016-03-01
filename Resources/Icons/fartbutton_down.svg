@@ -45,7 +45,7 @@
 		<clipPath id="White_border_1_">
 			<use xlink:href="#White_border_11_"  style="overflow:visible;"/>
 		</clipPath>
-		<g id="White_border_12_" style="opacity:0.38;clip-path:url(#White_border_1_);filter:url(#AI_GaußscherWeichzeichner_7);">
+		<g id="White_border_12_" style="opacity:0.31;clip-path:url(#White_border_1_);filter:url(#AI_GaußscherWeichzeichner_7);">
 			<path d="M672.402,89L912,328.598v344.804L672.402,922H327.599L79,673.402V328.598L327.599,89H672.402 M678.615,74h-6.213H327.599
 				h-6.052l-4.357,4.2L68.591,317.798L64,322.222v6.376v344.804v6.213l4.394,4.394l248.599,248.598l4.394,4.394h6.213h344.804h6.376
 				l4.425-4.591l239.598-248.598l4.199-4.357v-6.052V328.598v-6.213l-4.394-4.393L683.009,78.394L678.615,74L678.615,74z"/>
@@ -62,7 +62,7 @@
 			<clipPath id="_x21__8_">
 				<use xlink:href="#_x21__4_"  style="overflow:visible;"/>
 			</clipPath>
-			<g id="_x21__5_" style="clip-path:url(#_x21__8_);filter:url(#AI_GaußscherWeichzeichner_4);">
+			<g id="_x21__5_" style="opacity:0.62;clip-path:url(#_x21__8_);filter:url(#AI_GaußscherWeichzeichner_4);">
 				<path d="M601.957,147.842l-28.996,535.539H435.892l-28.995-535.539H601.957 M587.459,716.77v142.342H421.395V716.77H587.459
 					 M607.235,142.842h-5.278H406.896h-5.278l0.286,5.271l28.994,535.539l0.257,4.729h4.736h137.069h4.736l0.256-4.729
 					l28.996-535.539L607.235,142.842L607.235,142.842z M592.459,711.77h-5H421.395h-5v5v142.342v5h5h166.064h5v-5V716.77V711.77
@@ -70,7 +70,7 @@
 			</g>
 		</g>
 	</g>
-	<g>
+	<g id="Shadow_white_border">
 		<defs>
 			<path id="White_border_5_" d="M689.385,44h-16.982H327.599h-16.542l-11.91,11.479L50.548,295.077L38,307.171v17.427v344.804
 				v16.982l12.009,12.009l248.599,248.598L310.615,959h16.983h344.804h17.428l12.093-12.548l239.598-248.598L953,685.944v-16.542
@@ -79,7 +79,7 @@
 		<clipPath id="White_border_2_">
 			<use xlink:href="#White_border_5_"  style="overflow:visible;"/>
 		</clipPath>
-		<g id="White_border_10_" style="clip-path:url(#White_border_2_);filter:url(#AI_GaußscherWeichzeichner_7);">
+		<g id="White_border_10_" style="opacity:0.49;clip-path:url(#White_border_2_);filter:url(#AI_GaußscherWeichzeichner_7);">
 			<path d="M689.385,49l11.509,11.009l239.098,238.598L951,310.615v16.983v344.804v16.542l-10.479,12.41L701.923,950.452L689.83,964
 				h-17.428H327.599h-16.983l-12.508-13.009L49.009,701.394L36,689.385v-16.982V327.598v-17.427l13.548-11.594L299.146,59.479
 				L311.057,49h16.542h344.804H689.385 M691.793,43h-2.408h-16.982H327.599h-16.542h-2.264l-1.699,1.496l-11.91,10.479l-0.096,0.083
@@ -123,7 +123,7 @@
 		<clipPath id="White_border_3_">
 			<use xlink:href="#White_border_7_"  style="overflow:visible;"/>
 		</clipPath>
-		<g id="White_border_8_" style="opacity:0.38;clip-path:url(#White_border_3_);filter:url(#AI_GaußscherWeichzeichner_7);">
+		<g id="White_border_8_" style="opacity:0.31;clip-path:url(#White_border_3_);filter:url(#AI_GaußscherWeichzeichner_7);">
 			<path d="M-437.598,71L-198,310.598v344.804L-437.598,904h-344.804L-1031,655.402V310.598L-782.401,71H-437.598 M-431.385,56
 				h-6.213h-344.804h-6.052l-4.357,4.2l-248.599,239.598l-4.591,4.424v6.376v344.804v6.213l4.394,4.394l248.599,248.598l4.394,4.394
 				h6.213h344.804h6.376l4.424-4.591l239.599-248.598l4.199-4.357v-6.052V310.598v-6.213l-4.394-4.393L-426.991,60.394L-431.385,56
@@ -141,7 +141,7 @@
 			<clipPath id="_x21__9_">
 				<use xlink:href="#_x21__1_"  style="overflow:visible;"/>
 			</clipPath>
-			<g id="_x21__2_" style="clip-path:url(#_x21__9_);filter:url(#AI_GaußscherWeichzeichner_4);">
+			<g id="_x21__2_" style="opacity:0.62;clip-path:url(#_x21__9_);filter:url(#AI_GaußscherWeichzeichner_4);">
 				<path d="M-508.043,129.842l-28.996,535.539h-137.069l-28.995-535.539H-508.043 M-522.541,698.77v142.342h-166.064V698.77
 					H-522.541 M-502.765,124.842h-5.278h-195.061h-5.278l0.286,5.271l28.994,535.539l0.257,4.729h4.736h137.069h4.736l0.256-4.729
 					l28.996-535.539L-502.765,124.842L-502.765,124.842z M-517.541,693.77h-5h-166.064h-5v5v142.342v5h5h166.064h5v-5V698.77V693.77

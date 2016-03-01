@@ -6,7 +6,7 @@
     android:minWidth="40dp"
     android:minHeight="40dp"
     android:updatePeriodMillis="3600000"
-    android:previewImage="@drawable/img_fart_up"
+    android:previewImage="@drawable/ic_fartbutton_up"
     android:initialLayout="@layout/fartbutton_widget"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen|keyguard"
