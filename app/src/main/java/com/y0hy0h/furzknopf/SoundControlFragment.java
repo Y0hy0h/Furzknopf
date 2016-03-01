@@ -3,6 +3,7 @@ package com.y0hy0h.furzknopf;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 
 public class SoundControlFragment extends Fragment {
@@ -57,19 +58,8 @@ public class SoundControlFragment extends Fragment {
         mSoundController.freeResources();
     }
 
-    public int getRegularSoundsLoaded() {
-        return mSoundController.getRegularSoundsLoaded();
-    }
-
-    public void playRegularFart() {
-        mSoundController.playRegularFart();
-    }
-
-    public boolean bigFartLoaded() {
-        return mSoundController.bigFartLoaded();
-    }
-
-    public long playBigFart() {
-        return mSoundController.playBigFart();
+    public SoundController getSoundController()
+    {
+        return mSoundController;
     }
 }

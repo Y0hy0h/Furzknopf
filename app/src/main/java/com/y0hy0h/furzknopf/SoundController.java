@@ -5,6 +5,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
+import android.os.Vibrator;
 import android.util.Log;
 
 import java.io.IOException;
@@ -95,10 +96,9 @@ public class SoundController {
     }
 
     /**
-     * Frees most of the resources that are kept by the app.
+     * Frees most of the resources that are kept by the SoundController.
      */
     public void freeResources() {
-        // Activity was stopped, release SoundPool's and queue's resources.
         if (mLoadedSoundIDs != null) {
             mSoundPool.release();
             mLoadedSoundIDs.clear();
@@ -118,8 +118,6 @@ public class SoundController {
     /**
      * Plays a regular fart and vibrates.
      * Assumes at least one file is loaded.
-     *
-     * @see SoundControlFragment#playBigFart()
      */
     public void playRegularFart() {
 
@@ -144,8 +142,34 @@ public class SoundController {
     /**
      * Plays a big fart and vibrates.
      *
+     * @param vibrator The vibrator to use.
      * @return amount of milliseconds that the big fart will last
-     * @see SoundControlFragment#playRegularFart()
+     */
+    long playBigFart(Vibrator vibrator) {
+        // Choose random frequency.
+        float freq = Utility.getFloatBetween(0.9f, 1.2f);
+
+        // Play chosen sound with chosen frequency.
+        mSoundPool.play(mBigFartID, 1, 1, 0, 0, freq);
+
+        long duration = (long) (3813 / freq);
+
+        // Vibrate, add audio attributes depending on API level.
+        if (Build.VERSION.SDK_INT >= 21)
+            vibrator.vibrate(
+                    duration,
+                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()
+            );
+        else
+            vibrator.vibrate(duration);
+
+        return duration;
+    }
+
+    /**
+     * Plays a big fart without vibrating.
+     *
+     * @return amount of milliseconds that the big fart will last
      */
     long playBigFart() {
         // Choose random frequency.
@@ -154,7 +178,6 @@ public class SoundController {
         // Play chosen sound with chosen frequency.
         mSoundPool.play(mBigFartID, 1, 1, 0, 0, freq);
 
-        // Return whole duration.
         return (long) (3813 / freq);
     }
 

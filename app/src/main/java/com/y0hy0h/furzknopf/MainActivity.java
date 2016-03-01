@@ -23,7 +23,6 @@ public class MainActivity extends AppCompatActivity {
 
     // toast objects to prevent multiple toasts from stacking
     private static Toast mToastNoSoundLoaded;
-    private static Toast mToastNoVibrator;
 
     private static SoundControlFragment mSoundControl;
     private static final String FRAGMENT_TAG = "soundControlFragment";
@@ -128,11 +127,10 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Plays big fart, vibrates and keeps button pressed.
      * @see MainActivity#bigFart()
-     * @see SoundControlFragment#playRegularFart()
      */
     private void regularFart() {
-        if (mSoundControl.getRegularSoundsLoaded() > 0)
-            mSoundControl.playRegularFart();
+        if (mSoundControl.getSoundController().getRegularSoundsLoaded() > 0)
+            mSoundControl.getSoundController().playRegularFart();
         else
             reportNoSoundLoaded();
     }
@@ -140,25 +138,16 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Plays big fart, vibrates and keeps button pressed.
      * @see MainActivity#regularFart()
-     * @see SoundControlFragment#playBigFart()
+     * @see SoundController#playBigFart()
      */
     private void bigFart() {
-        if (!mSoundControl.bigFartLoaded()) {
+        if (!mSoundControl.getSoundController().bigFartLoaded()) {
             reportNoSoundLoaded();
             return;
         }
 
         mBigFartPlaying = true;
-        long duration = mSoundControl.playBigFart();
-
-        // Vibrate, add audio attributes depending on API level.
-        if (Build.VERSION.SDK_INT >= 21)
-            mVibrator.vibrate(
-                    duration,
-                    new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()
-            );
-        else
-            mVibrator.vibrate(duration);
+        long duration = mSoundControl.getSoundController().playBigFart(mVibrator);
 
         mFartbutton.postDelayed(
                 new Runnable() {
@@ -186,26 +175,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows a toast reporting that vibrator has been found.
-     * Cancels toast, if already present, to prevent toast stacking.
-     */
-    private void reportNoVibratorFound() {
-        if (mToastNoVibrator != null) {
-            mToastNoVibrator.cancel();
-        }
-
-        mToastNoVibrator = Toast.makeText(this, R.string.noVibratorFound, Toast.LENGTH_SHORT);
-        mToastNoVibrator.show();
-    }
-
-    /**
      * Resets the cooldown.
-     * Cooldown is at least 75, maximum is 150 with increasing probability.
      */
     private void resetCoolDown() {
         mCoolDown = getNewCoolDown();
     }
 
+    /**
+     * Cooldown is at least 75, maximum is 150 with increasing probability.
+     * @return A new value for the cooldown (respecting its bounds).
+     */
     public static int getNewCoolDown() {
         return 150 - Utility.getMappedRandomInt(75, 2);
     }
