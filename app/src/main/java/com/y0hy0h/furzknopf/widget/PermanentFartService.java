@@ -44,11 +44,11 @@ public class PermanentFartService extends Service {
         if (intent != null) {
             switch (intent.getAction()) {
                 case ACTION_PLAY_FART: {
-                    if (mSoundControl != null) {
-                        mSoundControl.playRegularFart();
-                    } else {
+                    if (mSoundControl == null || !mSoundControl.playRegularFart()) {
                         mSoundControl = new SoundController();
                         mSoundControl.initAndLoadSounds(getAssets());
+
+                        mSoundControl.playRegularFart();
                     }
                     break;
                 }

@@ -117,9 +117,13 @@ public class SoundController {
 
     /**
      * Plays a regular fart and vibrates.
-     * Assumes at least one file is loaded.
      */
-    public void playRegularFart() {
+    public boolean playRegularFart() {
+
+        if (getRegularSoundsLoaded() == 0)
+        {
+            return false;
+        }
 
         int skipAmount = 0;
 
@@ -135,8 +139,12 @@ public class SoundController {
         // Choose random frequency.
         float freq = Utility.getFloatBetween(0.75f, 1.5f);
 
+        Log.d(LOG_TAG, "Playing sound "+nextSoundID+", bigFartID: "+mBigFartID);
+
         // Play chosen sound with chosen frequency.
         mSoundPool.play(nextSoundID, 1, 1, 0, 0, freq);
+
+        return true;
     }
 
     /**

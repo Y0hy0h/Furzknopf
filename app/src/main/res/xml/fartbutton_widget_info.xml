@@ -5,7 +5,7 @@
 
     android:minWidth="40dp"
     android:minHeight="40dp"
-    android:updatePeriodMillis="3600000"
+    android:updatePeriodMillis="0"
     android:previewImage="@drawable/ic_fartbutton_up"
     android:initialLayout="@layout/fartbutton_widget"
     android:resizeMode="horizontal|vertical"

@@ -79,7 +79,15 @@ public class MainActivity extends AppCompatActivity {
 
                     case MotionEvent.ACTION_UP : {
                         if (!mBigFartPlaying) {
-                            mFartbutton.setPressed(false);
+                            mFartbutton.postDelayed(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mFartbutton.setPressed(false);
+                                        }
+                                    },
+                                    25
+                            );
                             return true;
                         } else {
                             return false;
@@ -163,10 +171,9 @@ public class MainActivity extends AppCompatActivity {
      * @see MainActivity#bigFart()
      */
     private void regularFart() {
-        if (mSoundControl.getSoundController().getRegularSoundsLoaded() > 0)
-            mSoundControl.getSoundController().playRegularFart();
-        else
+        if (!mSoundControl.getSoundController().playRegularFart()) {
             reportNoSoundLoaded();
+        }
     }
 
     /**
