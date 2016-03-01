@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="farbuttonWidth">@dimen/match_parent</dimen>
+    <dimen name="farbuttonHeight">@dimen/wrap_content</dimen>
+</resources>

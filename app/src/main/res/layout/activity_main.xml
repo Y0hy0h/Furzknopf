@@ -10,8 +10,8 @@
 
     <ImageButton
         android:id="@+id/fartbutton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="@dimen/farbuttonWidth"
+        android:layout_height="@dimen/farbuttonHeight"
         android:layout_gravity="center"
         android:src="@drawable/sel_fart_button"
         android:scaleType="fitCenter"
