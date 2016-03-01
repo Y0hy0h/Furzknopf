@@ -17,7 +17,7 @@
         android:scaleType="fitCenter"
         android:adjustViewBounds="true"
         android:background="@android:color/transparent"
-        android:clickable="true"
+        android:clickable="false"
         android:contentDescription="@string/fartbuttonDescription"/>
 
 </FrameLayout>

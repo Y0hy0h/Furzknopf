@@ -1,12 +1,14 @@
 package com.y0hy0h.furzknopf;
 
 import android.content.Context;
-import android.media.AudioAttributes;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -52,19 +54,36 @@ public class MainActivity extends AppCompatActivity {
         // Bind onTouchListener to fartbutton.
         // This allows the button to fart when pressed down.
         mFartbutton = (ImageButton) findViewById(R.id.fartbutton);
+        mFartbutton.setDrawingCacheEnabled(true);
         mFartbutton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent event) {
+
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN: {
-                        playFart();
-                        return false;
+                        if (onOpaquePixel(view, (int) event.getX(), (int) event.getY())) {
+                            mFartbutton.setPressed(true);
+                            playFart();
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+
+                    case MotionEvent.ACTION_MOVE: {
+                        if (onOpaquePixel(view, (int) event.getX(), (int) event.getY())) {
+                            return false;
+                        }
+                        // else fall thru
                     }
 
                     case MotionEvent.ACTION_UP : {
-                        // if big fart is playing, consume up action
-                        // to prevent button from popping back up
-                        return mBigFartPlaying;
+                        if (!mBigFartPlaying) {
+                            mFartbutton.setPressed(false);
+                            return true;
+                        } else {
+                            return false;
+                        }
                     }
                 }
                 return false;
@@ -77,6 +96,21 @@ public class MainActivity extends AppCompatActivity {
         } else {
             resetCoolDown();
         }
+    }
+
+    private boolean onOpaquePixel(View view, int x, int y)
+    {
+        // Check for touch on opaque part of button
+        Bitmap bmp = Bitmap.createBitmap(view.getDrawingCache());
+        int color = 0;
+        try {
+            color = bmp.getPixel(x, y);
+        } catch (IllegalArgumentException e)
+        {
+            Log.d(LOG_TAG, "Touch outside image bounds.");
+        }
+
+        return color != Color.TRANSPARENT;
     }
 
     @Override
