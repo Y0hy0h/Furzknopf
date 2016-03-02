@@ -3,7 +3,6 @@ package com.y0hy0h.furzknopf;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 
 public class SoundControlFragment extends Fragment {
@@ -11,6 +10,7 @@ public class SoundControlFragment extends Fragment {
     private static final String LOG_TAG = SoundControlFragment.class.getSimpleName();
 
     private static SoundController mSoundController;
+    private static SoundController.BigFartListener mListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -19,8 +19,7 @@ public class SoundControlFragment extends Fragment {
         // Retain fragment when runtime change occurs in Activity.
         setRetainInstance(true);
 
-        mSoundController = new SoundController();
-        mSoundController.initAndLoadSounds(getActivity().getAssets());
+        mSoundController = new SoundController(mListener, getActivity().getAssets());
     }
 
     @Override

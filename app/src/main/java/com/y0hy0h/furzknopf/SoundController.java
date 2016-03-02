@@ -5,6 +5,7 @@ import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
+import android.os.Handler;
 import android.os.Vibrator;
 import android.util.Log;
 
@@ -20,15 +21,18 @@ public class SoundController {
     // contains the IDs of the regular farts
     private static LinkedList<Integer> mLoadedSoundIDs;
     private static int mBigFartID = -1;
+    private boolean mBigFartPlaying;
+    private BigFartListener mBigFartListener;
+    private int mCooldown;
 
-    /**
-     * Initializes the SoundPool and ID-queue and loads default sounds.
-     */
-    public void initAndLoadSounds(final AssetManager assetManager) {
-        // Initialize SoundPool depending on API version,
-        mSoundPool = createSoundPoolCompatibly(6);
-        mLoadedSoundIDs = new LinkedList<>();
-        loadSounds(assetManager);
+    public SoundController(final AssetManager assetManager) {
+        initAndLoadSounds(assetManager);
+    }
+
+    public SoundController(BigFartListener bigFartListener, final AssetManager assetManager) {
+        mBigFartListener = bigFartListener;
+
+        initAndLoadSounds(assetManager);
     }
 
     /**
@@ -57,6 +61,30 @@ public class SoundController {
         }
 
         return resSoundPool;
+    }
+
+    /**
+     * Cooldown is at least 75, maximum is 150 with increasing probability.
+     * @return A new value for the cooldown (respecting its bounds).
+     */
+    public static int getNewCoolDown() {
+        return 150 - Utility.getMappedRandomInt(75, 2);
+    }
+
+    public void setBigFartListener(BigFartListener bigFartListener) {
+        mBigFartListener = bigFartListener;
+    }
+
+    /**
+     * Initializes the SoundPool and ID-queue and loads default sounds.
+     */
+    public void initAndLoadSounds(final AssetManager assetManager) {
+        // Initialize SoundPool depending on API version,
+        mSoundPool = createSoundPoolCompatibly(6);
+        mLoadedSoundIDs = new LinkedList<>();
+        loadSounds(assetManager);
+
+        mCooldown = getNewCoolDown();
     }
 
     /**
@@ -116,13 +144,35 @@ public class SoundController {
     }
 
     /**
+     * Plays a fart when touched.
+     * This is the method called through the fartbutton's onTouchListener.
+     */
+    public boolean playFart(Vibrator vibrator) throws NoSoundLoadedException {
+        // Abort if big fart is currently playing.
+        if (mBigFartPlaying) {
+            return false;
+        }
+
+        // Play regular or big fart depending on cooldown.
+        if (mCooldown > 0) {
+            mCooldown--;
+            playRegularFart();
+        } else {
+            mCooldown = getNewCoolDown();
+            playBigFart(vibrator);
+        }
+
+        return true;
+    }
+
+    /**
      * Plays a regular fart and vibrates.
      */
-    public boolean playRegularFart() {
+    public void playRegularFart() throws NoSoundLoadedException {
 
         if (getRegularSoundsLoaded() == 0)
         {
-            return false;
+            throw new NoSoundLoadedException();
         }
 
         int skipAmount = 0;
@@ -139,12 +189,8 @@ public class SoundController {
         // Choose random frequency.
         float freq = Utility.getFloatBetween(0.75f, 1.5f);
 
-        Log.d(LOG_TAG, "Playing sound "+nextSoundID+", bigFartID: "+mBigFartID);
-
         // Play chosen sound with chosen frequency.
         mSoundPool.play(nextSoundID, 1, 1, 0, 0, freq);
-
-        return true;
     }
 
     /**
@@ -157,19 +203,34 @@ public class SoundController {
         // Choose random frequency.
         float freq = Utility.getFloatBetween(0.9f, 1.2f);
 
+        mBigFartListener.bigFartStarted();
+
         // Play chosen sound with chosen frequency.
         mSoundPool.play(mBigFartID, 1, 1, 0, 0, freq);
 
         long duration = (long) (3813 / freq);
 
         // Vibrate, add audio attributes depending on API level.
-        if (Build.VERSION.SDK_INT >= 21)
+        if (Build.VERSION.SDK_INT >= 21) {
             vibrator.vibrate(
                     duration,
                     new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build()
             );
-        else
+        } else {
             vibrator.vibrate(duration);
+        }
+
+        mBigFartPlaying = true;
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mBigFartPlaying = false;
+                                    mBigFartListener.bigFartEnded();
+                                }
+                            },
+                duration
+        );
 
         return duration;
     }
@@ -189,11 +250,23 @@ public class SoundController {
         return (long) (3813 / freq);
     }
 
+    public boolean isBigFartPlaying() {
+        return mBigFartPlaying;
+    }
+
     /**
      * Returns whether the big fart is already loaded.
      * @return whether bigFart is already loaded.
      */
     boolean bigFartLoaded() {
         return mBigFartID != -1;
+    }
+
+    public interface BigFartListener {
+        void bigFartStarted();
+        void bigFartEnded();
+    }
+
+    public class NoSoundLoadedException extends Exception {
     }
 }

@@ -29,13 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private static SoundControlFragment mSoundControl;
     private static final String FRAGMENT_TAG = "soundControlFragment";
 
-    // cooldown after which big fart is played
-    private static int mCoolDown;
-    // String for onSaveInstance's Bundle key
-    private static final String STATE_COOLDOWN = "cooldown";
-
     // flag, if bigFart is currently playing
-    private static boolean mBigFartPlaying = false;
+    private static SoundController.BigFartListener mBigFartListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +42,17 @@ public class MainActivity extends AppCompatActivity {
         mSoundControl = (SoundControlFragment) fm.findFragmentByTag(FRAGMENT_TAG);
 
         if (mSoundControl == null) {
+            mBigFartListener = new SoundController.BigFartListener() {
+                @Override
+                public void bigFartStarted() {
+                    mFartbutton.setPressed(true);
+                }
+
+                @Override
+                public void bigFartEnded() {
+                    mFartbutton.setPressed(false);
+                }
+            };
             mSoundControl = new SoundControlFragment();
             fm.beginTransaction().add(mSoundControl, FRAGMENT_TAG).commit();
         }
@@ -63,7 +69,11 @@ public class MainActivity extends AppCompatActivity {
                     case MotionEvent.ACTION_DOWN: {
                         if (onOpaquePixel(view, (int) event.getX(), (int) event.getY())) {
                             mFartbutton.setPressed(true);
-                            playFart();
+                            try {
+                                mSoundControl.getSoundController().playFart(mVibrator);
+                            } catch (SoundController.NoSoundLoadedException e) {
+                                e.printStackTrace();
+                            }
                             return true;
                         } else {
                             return false;
@@ -78,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     case MotionEvent.ACTION_UP : {
-                        if (!mBigFartPlaying) {
+                        if (!mSoundControl.getSoundController().isBigFartPlaying()) {
                             mFartbutton.postDelayed(
                                     new Runnable() {
                                         @Override
@@ -97,13 +107,6 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-
-        // Initialize cooldown. Survives onStop().
-        if (savedInstanceState != null) {
-            mCoolDown = savedInstanceState.getInt(STATE_COOLDOWN);
-        } else {
-            resetCoolDown();
-        }
     }
 
     private boolean onOpaquePixel(View view, int x, int y)
@@ -139,69 +142,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt(STATE_COOLDOWN, mCoolDown);
-
-        super.onSaveInstanceState(outState);
-    }
-
-    /**
-     * Plays a fart when touched.
-     * This is the method called through the fartbutton's onTouchListener.
-     */
-    private void playFart() {
-        // Abort if big fart is currently playing.
-        if (mBigFartPlaying) {
-            return;
-        }
-
-        // Play regular or big fart depending on cooldown.
-        if (mCoolDown > 0) {
-            mCoolDown--;
-            regularFart();
-        } else {
-            resetCoolDown();
-            bigFart();
-        }
-    }
-
-    /**
-     * Plays big fart, vibrates and keeps button pressed.
-     * @see MainActivity#bigFart()
-     */
-    private void regularFart() {
-        if (!mSoundControl.getSoundController().playRegularFart()) {
-            reportNoSoundLoaded();
-        }
-    }
-
-    /**
-     * Plays big fart, vibrates and keeps button pressed.
-     * @see MainActivity#regularFart()
-     * @see SoundController#playBigFart()
-     */
-    private void bigFart() {
-        if (!mSoundControl.getSoundController().bigFartLoaded()) {
-            reportNoSoundLoaded();
-            return;
-        }
-
-        mBigFartPlaying = true;
-        long duration = mSoundControl.getSoundController().playBigFart(mVibrator);
-
-        mFartbutton.postDelayed(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        mBigFartPlaying = false;
-                        mFartbutton.setPressed(false);
-                    }
-                },
-                duration
-        );
-    }
-
     /**
      * Shows a toast reporting that the sound is not yet loaded.
      * Cancels toast, if already present, to prevent toast stacking.
@@ -213,20 +153,5 @@ public class MainActivity extends AppCompatActivity {
 
         mToastNoSoundLoaded = Toast.makeText(this, R.string.noSoundLoaded, Toast.LENGTH_SHORT);
         mToastNoSoundLoaded.show();
-    }
-
-    /**
-     * Resets the cooldown.
-     */
-    private void resetCoolDown() {
-        mCoolDown = getNewCoolDown();
-    }
-
-    /**
-     * Cooldown is at least 75, maximum is 150 with increasing probability.
-     * @return A new value for the cooldown (respecting its bounds).
-     */
-    public static int getNewCoolDown() {
-        return 150 - Utility.getMappedRandomInt(75, 2);
     }
 }
