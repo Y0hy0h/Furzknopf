@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                             try {
                                 mSoundControl.getSoundController().playFart(mVibrator);
                             } catch (SoundController.NoSoundLoadedException e) {
-                                e.printStackTrace();
+                                reportNoSoundLoaded();
                             }
                             return true;
                         } else {

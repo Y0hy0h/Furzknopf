@@ -28,12 +28,10 @@ public class PermanentFartService extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(LOG_TAG, "Start");
 
         if (intent != null) {
             switch (intent.getAction()) {
                 case ACTION_PLAY_FART: {
-                    Log.d(LOG_TAG, "fart");
                     if (mSoundControl == null) {
                         initSoundControl();
                     }
@@ -47,7 +45,6 @@ public class PermanentFartService extends Service {
                 }
 
                 case ACTION_POKE: {
-                    Log.d(LOG_TAG, "Poke");
                     initSoundControl();
                     break;
                 }
