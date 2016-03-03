@@ -13,26 +13,26 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Locale;
 
-public class SoundController {
+public class FartController {
     // tag for use in Log-statements
-    private static final String LOG_TAG = SoundController.class.getSimpleName();
+    private static final String LOG_TAG = FartController.class.getSimpleName();
 
-    private static SoundPool mSoundPool;
+    private SoundPool mSoundPool;
     // contains the IDs of the regular farts
-    private static LinkedList<Integer> mLoadedSoundIDs;
-    private static int mBigFartID = -1;
+    private LinkedList<Integer> mLoadedSoundIDs;
+    private int mBigFartID = -1;
     private boolean mBigFartPlaying;
     private BigFartListener mBigFartListener;
     private int mCooldown;
 
-    public SoundController(final AssetManager assetManager) {
-        initAndLoadSounds(assetManager);
+    public FartController(final AssetManager assetManager, final boolean fartImmediately) {
+        initAndLoadSounds(assetManager, fartImmediately);
     }
 
-    public SoundController(BigFartListener bigFartListener, final AssetManager assetManager) {
+    public FartController(BigFartListener bigFartListener, final AssetManager assetManager) {
         mBigFartListener = bigFartListener;
 
-        initAndLoadSounds(assetManager);
+        initAndLoadSounds(assetManager, false);
     }
 
     /**
@@ -78,11 +78,11 @@ public class SoundController {
     /**
      * Initializes the SoundPool and ID-queue and loads default sounds.
      */
-    public void initAndLoadSounds(final AssetManager assetManager) {
+    public void initAndLoadSounds(final AssetManager assetManager, final boolean fartImmediately) {
         // Initialize SoundPool depending on API version,
         mSoundPool = createSoundPoolCompatibly(6);
         mLoadedSoundIDs = new LinkedList<>();
-        loadSounds(assetManager);
+        loadSounds(assetManager, fartImmediately);
 
         mCooldown = getNewCoolDown();
     }
@@ -90,7 +90,7 @@ public class SoundController {
     /**
      * Loads the default fart sounds into the SoundPool and enqueues the sound's IDs.
      */
-    public void loadSounds(final AssetManager assetManager) {
+    public void loadSounds(final AssetManager assetManager, final boolean fartImmediately) {
 
         new Thread(new Runnable() {
             private int tempBigFartID;
@@ -100,10 +100,19 @@ public class SoundController {
                 mSoundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
                     @Override
                     public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                        Log.d(LOG_TAG, "Loaded a sound, id: "+sampleId+", fartImmediatly: "+fartImmediately);
                         if (sampleId == tempBigFartID) {
                             mBigFartID = sampleId;
                         } else {
                             mLoadedSoundIDs.add(sampleId);
+                            if (fartImmediately && getRegularSoundsLoaded() == 1)
+                            {
+                                try {
+                                    playRegularFart();
+                                } catch (NoSoundLoadedException e) {
+                                    Log.e(LOG_TAG, "Error: Loaded sound could not be played.", e);
+                                }
+                            }
                         }
                     }
                 });
@@ -124,7 +133,7 @@ public class SoundController {
     }
 
     /**
-     * Frees most of the resources that are kept by the SoundController.
+     * Frees most of the resources that are kept by the FartController.
      */
     public void freeResources() {
         if (mLoadedSoundIDs != null) {
@@ -189,6 +198,8 @@ public class SoundController {
         // Choose random frequency.
         float freq = Utility.getFloatBetween(0.75f, 1.5f);
 
+        Log.d(LOG_TAG, "Playing sound with id "+nextSoundID);
+
         // Play chosen sound with chosen frequency.
         mSoundPool.play(nextSoundID, 1, 1, 0, 0, freq);
     }
@@ -203,7 +214,9 @@ public class SoundController {
         // Choose random frequency.
         float freq = Utility.getFloatBetween(0.9f, 1.2f);
 
-        mBigFartListener.bigFartStarted();
+        if (mBigFartListener != null) {
+            mBigFartListener.bigFartStarted();
+        }
 
         // Play chosen sound with chosen frequency.
         mSoundPool.play(mBigFartID, 1, 1, 0, 0, freq);
@@ -226,7 +239,9 @@ public class SoundController {
                                 @Override
                                 public void run() {
                                     mBigFartPlaying = false;
-                                    mBigFartListener.bigFartEnded();
+                                    if (mBigFartListener != null) {
+                                        mBigFartListener.bigFartEnded();
+                                    }
                                 }
                             },
                 duration

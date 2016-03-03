@@ -19,13 +19,10 @@ public class FartbuttonWidget extends AppWidgetProvider {
                 context.getPackageName(),
                 R.layout.fartbutton_widget
         );
-        Intent playIntent = PermanentFartService.createIntentPlayFart(context);
+        Intent playIntent = FartService.createIntentPlayRegularFart(context);
         PendingIntent playPendingIntent = PendingIntent.getService(context, 0, playIntent, 0);
         remoteViews.setOnClickPendingIntent(R.id.fartbutton_widget, playPendingIntent);
 
         appWidgetManager.updateAppWidget(appWidgetIds, remoteViews);
-
-        Intent pokeIntent = PermanentFartService.createIntentPoke(context);
-        context.startService(pokeIntent);
     }
 }

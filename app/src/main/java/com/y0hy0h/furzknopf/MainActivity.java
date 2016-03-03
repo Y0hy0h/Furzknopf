@@ -3,6 +3,7 @@ package com.y0hy0h.furzknopf;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -16,33 +17,33 @@ import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
-    // tag for use in Log-statements
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
-
-    private Vibrator mVibrator;
 
     private ImageButton mFartbutton;
 
-    // toast objects to prevent multiple toasts from stacking
+    // toast object to prevent multiple toasts from stacking
     private static Toast mToastNoSoundLoaded;
 
-    private static SoundControlFragment mSoundControl;
-    private static final String FRAGMENT_TAG = "soundControlFragment";
+    private static RetainedFragment mRetainedFragment;
+    private static final String FRAGMENT_TAG = "retainedFragment";
 
-    // flag, if bigFart is currently playing
-    private static SoundController.BigFartListener mBigFartListener;
+    private static FartController.BigFartListener mBigFartListener;
+    private Vibrator mVibrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Bind SoundControlFragment.
+        // Bind RetainedFragment.
         FragmentManager fm = getSupportFragmentManager();
-        mSoundControl = (SoundControlFragment) fm.findFragmentByTag(FRAGMENT_TAG);
+        mRetainedFragment = (RetainedFragment) fm.findFragmentByTag(FRAGMENT_TAG);
 
-        if (mSoundControl == null) {
-            mBigFartListener = new SoundController.BigFartListener() {
+        if (mRetainedFragment == null) {
+            mRetainedFragment = new RetainedFragment();
+            fm.beginTransaction().add(mRetainedFragment, FRAGMENT_TAG).commit();
+
+            FartController.BigFartListener listener = new FartController.BigFartListener() {
                 @Override
                 public void bigFartStarted() {
                     mFartbutton.setPressed(true);
@@ -53,8 +54,7 @@ public class MainActivity extends AppCompatActivity {
                     mFartbutton.setPressed(false);
                 }
             };
-            mSoundControl = new SoundControlFragment();
-            fm.beginTransaction().add(mSoundControl, FRAGMENT_TAG).commit();
+            mRetainedFragment.setFartController(new FartController(listener, getAssets()));
         }
 
         // Bind onTouchListener to fartbutton.
@@ -70,8 +70,8 @@ public class MainActivity extends AppCompatActivity {
                         if (onOpaquePixel(view, (int) event.getX(), (int) event.getY())) {
                             mFartbutton.setPressed(true);
                             try {
-                                mSoundControl.getSoundController().playFart(mVibrator);
-                            } catch (SoundController.NoSoundLoadedException e) {
+                                mRetainedFragment.getFartController().playFart(mVibrator);
+                            } catch (FartController.NoSoundLoadedException e) {
                                 reportNoSoundLoaded();
                             }
                             return true;
@@ -87,8 +87,9 @@ public class MainActivity extends AppCompatActivity {
                         // else fall thru
                     }
 
-                    case MotionEvent.ACTION_UP : {
-                        if (!mSoundControl.getSoundController().isBigFartPlaying()) {
+                    case MotionEvent.ACTION_UP: {
+                        if (!mRetainedFragment.getFartController().isBigFartPlaying()) {
+                            // delay up action to make it more visible
                             mFartbutton.postDelayed(
                                     new Runnable() {
                                         @Override
@@ -107,8 +108,19 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        // Set appropriate volume control.
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
     }
 
+    /**
+     * Returns wheter the pixel at the given coordinates is opaque.
+     *
+     * @param view This view's drawing cache will be checked.
+     * @param x The x coordinate to check.
+     * @param y The y coordinate to check.
+     * @return True iff the pixel at (x,y) of the view's drawing cache is transparent.
+     */
     private boolean onOpaquePixel(View view, int x, int y)
     {
         // Check for touch on opaque part of button
@@ -136,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        // Stop vibration, if just recreating app.
+        // Stop vibration, if not just recreating app.
         if (Build.VERSION.SDK_INT >= 11 && !isChangingConfigurations()) {
             mVibrator.cancel();
         }
