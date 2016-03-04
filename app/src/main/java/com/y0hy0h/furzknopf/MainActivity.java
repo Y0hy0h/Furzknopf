@@ -27,7 +27,6 @@ public class MainActivity extends AppCompatActivity {
     private static RetainedFragment mRetainedFragment;
     private static final String FRAGMENT_TAG = "retainedFragment";
 
-    private static FartController.BigFartListener mBigFartListener;
     private Vibrator mVibrator;
 
     @Override
@@ -42,19 +41,6 @@ public class MainActivity extends AppCompatActivity {
         if (mRetainedFragment == null) {
             mRetainedFragment = new RetainedFragment();
             fm.beginTransaction().add(mRetainedFragment, FRAGMENT_TAG).commit();
-
-            FartController.BigFartListener listener = new FartController.BigFartListener() {
-                @Override
-                public void bigFartStarted() {
-                    mFartbutton.setPressed(true);
-                }
-
-                @Override
-                public void bigFartEnded() {
-                    mFartbutton.setPressed(false);
-                }
-            };
-            mRetainedFragment.setFartController(new FartController(listener, getAssets()));
         }
 
         // Bind onTouchListener to fartbutton.
